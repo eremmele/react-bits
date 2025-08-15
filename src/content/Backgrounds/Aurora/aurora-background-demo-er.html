@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Background Demo</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        #root {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .aurora-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            color: white;
+            pointer-events: none;
+        }
+
+        .aurora-content h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .aurora-content h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- React and dependencies from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/three@0.150.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/@react-three/fiber@8.15.0/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@react-three/drei@9.95.0/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/framer-motion@11.0.0/dist/framer-motion.js"></script>
+    
+    <!-- ReactBits Aurora Component -->
+    <script src="https://unpkg.com/@appletosolutions/reactbits@1.0.3/dist/index.umd.js"></script>
+
+    <script>
+        const { useState, useEffect } = React;
+        const { Aurora } = ReactBits;
+
+        function App() {
+            const [config, setConfig] = useState({
+                colorStops: ["#ff6b6b", "#4ecdc4", "#45b7d1"],
+                amplitude: 1.2,
+                speed: 0.8,
+                showContent: true,
+                contentText: "Aurora Background",
+                contentColor: "#ffffff"
+            });
+
+            // Parse URL parameters
+            useEffect(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlConfig = {};
+                
+                const colors = urlParams.get('colors');
+                if (colors) {
+                    urlConfig.colorStops = colors.split(',').map(c => c.trim());
+                }
+                
+                const amplitude = urlParams.get('amplitude');
+                if (amplitude) {
+                    urlConfig.amplitude = parseFloat(amplitude);
+                }
+                
+                const speed = urlParams.get('speed');
+                if (speed) {
+                    urlConfig.speed = parseFloat(speed);
+                }
+                
+                const content = urlParams.get('content');
+                if (content) {
+                    urlConfig.contentText = decodeURIComponent(content);
+                }
+                
+                const showContent = urlParams.get('showContent');
+                if (showContent !== null) {
+                    urlConfig.showContent = showContent === 'true';
+                }
+                
+                const contentColor = urlParams.get('contentColor');
+                if (contentColor) {
+                    urlConfig.contentColor = decodeURIComponent(contentColor);
+                }
+                
+                if (Object.keys(urlConfig).length > 0) {
+                    setConfig(prev => ({ ...prev, ...urlConfig }));
+                }
+            }, []);
+
+            return React.createElement('div', { 
+                style: { 
+                    width: '100vw', 
+                    height: '100vh', 
+                    position: 'relative' 
+                } 
+            }, [
+                React.createElement(Aurora, {
+                    key: 'aurora',
+                    colorStops: config.colorStops,
+                    amplitude: config.amplitude,
+                    speed: config.speed
+                }),
+                config.showContent && React.createElement('div', {
+                    key: 'content',
+                    className: 'aurora-content',
+                    style: { color: config.contentColor }
+                }, React.createElement('h1', {}, config.contentText))
+            ]);
+        }
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>
